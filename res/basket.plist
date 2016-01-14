@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>basket2_01.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{53,0},{30,24}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{30,24}}</string>
+				<key>sourceSize</key>
+				<string>{30,24}</string>
+			</dict>
+
+			<key>basket2_02.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{31,100},{30,20}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{30,20}}</string>
+				<key>sourceSize</key>
+				<string>{30,20}</string>
+			</dict>
+
+			<key>basket2_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,100},{30,16}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{30,16}}</string>
+				<key>sourceSize</key>
+				<string>{30,16}</string>
+			</dict>
+
+			<key>basket_01.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{52,48}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{52,48}}</string>
+				<key>sourceSize</key>
+				<string>{52,48}</string>
+			</dict>
+
+			<key>basket_02.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,49},{52,30}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{52,30}}</string>
+				<key>sourceSize</key>
+				<string>{52,30}</string>
+			</dict>
+
+			<key>basket_03.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,80},{52,19}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{52,19}}</string>
+				<key>sourceSize</key>
+				<string>{52,19}</string>
+			</dict>
+
+		</dict>
+
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>size</key>
+			<string>{128,128}</string>
+			<key>textureFileName</key>
+			<string>basket.png</string>
+			</dict>
+		</dict>
+</plist>

@@ -1,0 +1,454 @@
+var AnimationLayer = cc.Layer.extend({
+    maxDistance: 0,
+    minDistance: 0,
+    catapultPosition: null,
+    fixedSpriteBall: null,
+    catapult: null,
+    ctor: function(space) {
+        var that = this;
+        this.holdingFixedBall = false;
+        this._super();
+        this.space = space;
+
+        // this._debugNode = new cc.PhysicsDebugNode(this.space);
+        // this.addChild(this._debugNode, 10);
+
+        this.addScenario();
+        this.initialization();
+        this.initTarget();
+        this.setupTouchListeners();
+
+        return true;
+    },
+    addScenario: function() {
+        var wallBottom = new cp.SegmentShape(this.space.staticBody,
+            cp.v(0, 20),// start point
+            cp.v(4000, 20),// MAX INT:4294967295
+            0);// thickness of wall
+
+        wallBottom.setElasticity(1);
+        wallBottom.setFriction(0.2);
+        this.space.addStaticShape(wallBottom);
+    },
+    addBall: function(pos) {
+        var realBall = this.space.addBody(new cp.Body(15, cp.momentForBox(15, 15, 15)));
+
+        realBall.setPos(pos);
+
+        var spriteBall = new cc.PhysicsSprite(res.ball_png);
+        var contentSize = spriteBall.getContentSize();
+
+        var ballShape = new cp.CircleShape(realBall, contentSize.width/2, cp.v(0,0));
+
+        ballShape.layers = layerOfSprite.ball;
+
+        ballShape.setCollisionType(layerOfSprite.ball);
+
+        var shapeRealBird = this.space.addShape(ballShape);
+        shapeRealBird.setElasticity(0.9);
+        shapeRealBird.setFriction(1);
+
+        spriteBall.setBody(realBall);
+
+        spriteBall.zIndex = -1;
+
+        this.addChild(spriteBall);
+
+        return realBall;
+    },
+    setupTouchListeners: function() {
+        var that = this;
+
+        cc.eventManager.addListener({
+            event: cc.EventListener.TOUCH_ONE_BY_ONE,
+            onTouchBegan: function(touch, event) {
+                var mousePosition = cp.v(touch.getLocationX(), touch.getLocationY());
+                var ponto = cp.v(touch.getLocationX(), touch.getLocationY() );
+                var catapultPoint = that.catapult.convertToWorldSpaceAR(cp.v(that.parent.x, that.parent.y));
+
+                if( that.distanceBetweenShapes(catapultPoint, mousePosition) <30 ) {
+                    that.holdingFixedBall = true;
+                }
+                return true;
+            },
+            onTouchMoved: function(touch, event) {
+                var mousePosition = cp.v(touch.getLocationX(), touch.getLocationY());
+                
+                if (that.holdingFixedBall) {
+                    var catapultPoint = cp.v(that.catapult.x, that.catapult.y);
+                    var pullAreaPosition = catapultPoint;
+                    if ( that.maxDistance >= that.distanceBetweenShapes(catapultPoint, mousePosition) ){
+                        var ponto = mousePosition;
+                    } else {
+
+                        var result = cp.v(mousePosition.x - catapultPoint.x, mousePosition.y - catapultPoint.y);
+                        var length = Math.sqrt(Math.pow(result.x,2) + Math.pow(result.y,2));
+                        result = cp.v(result.x * (that.maxDistance/length), result.y * (that.maxDistance/length) );
+                        var ponto = cp.v(result.x + catapultPoint.x, result.y + catapultPoint.y);
+                    }
+
+                    that.fixedSpriteBall.x = ponto.x;
+                    that.fixedSpriteBall.y = ponto.y;
+                }
+            },
+            onTouchEnded: function(touch, event) {
+                if ( that.holdingFixedBall) {
+                    var mousePosition = cp.v(touch.getLocationX(), touch.getLocationY());
+                    var pullAreaPosition = that.catapultPosition;
+                    var shotVect = cp.v( pullAreaPosition.x - mousePosition.x, pullAreaPosition.y - mousePosition.y );
+                    var ballBody = that.addBall(cp.v(pullAreaPosition.x, pullAreaPosition.y));
+
+                    ballBody.applyImpulse( cp.v(shotVect.x * 140, shotVect.y * 140), cp.v(shotVect.x, shotVect.y));
+                    that.fixedSpriteBall.x = pullAreaPosition.x;
+                    that.fixedSpriteBall.y = pullAreaPosition.y;
+                    that.holdingFixedBall = false;
+                }
+            }
+
+        }, this);
+    },
+    initialization: function() {
+
+
+        this.space.addCollisionHandler(layerOfSprite.chain, layerOfSprite.ball,
+            this.virtualCollisionBallBasket.bind(this), null, null, null);
+
+        this.maxDistance = 100;
+        this.minDistance = 60;
+
+        var winSize = cc.winSize;
+
+        this.catapult = new cc.Sprite(res.catapult_png);
+        this.catapult.setAnchorPoint(cp.v(0.5, 0.9))
+        this.catapult.attr( {x: 200, y:200} );
+
+        this.addChild(this.catapult);
+
+        this.fixedSpriteBall = new cc.Sprite(res.ball_png);
+        this.fixedSpriteBall.attr({x: 200, y: 200});
+
+        this.addChild(this.fixedSpriteBall);
+        this.catapultPosition = cp.v(200, 200);
+
+
+    },
+    initTarget: function() {
+        var that = this;
+
+        var addQuina = function(pos, width, height, aro, lado) {
+            
+            var bodyQuina = new cp.Body(70, cp.momentForBox(40, 15, 15));
+            var shapeQuina = new cp.BoxShape(bodyQuina, width, height);
+            shapeQuina.setFriction(1);
+            shapeQuina.setElasticity(0.5)
+            
+
+            bodyQuina.setPos(pos);
+
+            that.space.addShape(shapeQuina);
+            that.space.addBody(bodyQuina);
+
+            that.space.addConstraint
+            (   new cp.PivotJoint
+                (
+                    bodyQuina, 
+                    aro.body, 
+                    
+                    cp.v(0,-aro.sprite.getContentSize().height/2),
+                    cp.v( lado*aro.sprite.getContentSize().width/2 ,-aro.sprite.getContentSize().height/2)
+                )
+            );
+
+            that.space.addConstraint
+            (   new cp.PivotJoint
+                (
+                    bodyQuina, 
+                    aro.body, 
+                    
+                    cp.v(0,aro.sprite.getContentSize().height/2),
+                    cp.v( lado*aro.sprite.getContentSize().width/2,aro.sprite.getContentSize().height/2)
+                )
+            );
+
+            return {
+                body: bodyQuina,
+                shape: shapeQuina
+            };
+        };
+
+        var addBase = function(pos, width) {
+            var body = new  cp.Body(10, 1);
+            body.setPos(pos);
+            
+            that.space.addBody(body);
+            body.applyImpulse(cp.v(600, 600), cp.v(0, 0));
+
+            var shape = new cp.BoxShape(body, width, width);
+            // shape.setSensor(true);
+            that.space.addShape(shape);
+        };
+
+        var addTabela = function(pos, aro) {
+
+            var sprite = new cc.PhysicsSprite(res.tabela_png);
+
+            var finalPosition = cp.v.add(
+                pos, 
+                cp.v(
+                    aro.sprite.getContentSize().width/2 + sprite.getContentSize().width*1.5, 
+                    sprite.getContentSize().height/3
+                )
+            );
+
+            var body = new cp.StaticBody();
+            var shape = new cp.BoxShape(body, sprite.getContentSize().width, sprite.getContentSize().height);
+
+            body.setPos(finalPosition);
+
+            sprite.setBody(body);
+
+            that.space.addShape(shape);
+            that.addChild(sprite);
+        }
+
+        var addAro = function(pos) {
+
+            var spriteAro = new cc.PhysicsSprite(res.aro_png);
+            var bodyAro = new cp.StaticBody();
+
+            bodyAro.setPos(pos);
+            spriteAro.setBody(bodyAro);
+            var shapeAro = new cp.BoxShape(bodyAro, spriteAro.getContentSize().width, spriteAro.getContentSize().height);
+
+            
+            that.space.addShape(shapeAro);
+            that.addChild(spriteAro);
+
+            shapeAro.setSensor(true);
+
+            return {
+                shape: shapeAro,
+                sprite: spriteAro,
+                body: bodyAro
+            };
+        };
+
+        var addTeste = function(pos) {
+            var sprite = Teste.create({
+                image: res.aro_png
+            });
+
+            var squire = Squire.create({
+                image : res.aro_png,
+            });
+
+            var body = new cp.StaticBody();
+            body.setPos(pos);
+            sprite.setBody(body);
+            var shape = new cp.BoxShape(body, sprite.getContentSize().width, sprite.getContentSize().height);
+
+            sprite.setShape(shape);
+            sprite.setSpace(that.space);
+
+            that.space.addShape(shape);
+            that.addChild(sprite);
+
+            return {
+                shape: shape,
+                sprite: sprite,
+                body: body
+            };
+        }
+
+        var addChain = function(pos) {
+            var mass = 20;
+            var chainBody = that.space.addBody(new cp.Body(mass, cp.momentForBox(mass, 40, 90)/10));
+
+            chainBody.setPos(pos);
+
+            var spriteChain = new cc.PhysicsSprite(res.chain2_png);
+            var contentSize = spriteChain.getContentSize();
+
+            contents = contentSize;
+            spriteChain.setBody(chainBody);
+            var chainShape = new cp.BoxShape(chainBody, contentSize.width,contentSize.height);
+            chainShape.layers = layerOfSprite.ball;
+            chainShape.setSensor(true);
+            chainShape.setCollisionType(layerOfSprite.chain);
+            that.space.addShape(chainShape);
+            that.addChild(spriteChain);
+
+            // return chainBody;
+            return {
+                shape: chainShape,
+                sprite: spriteChain,
+                body: chainBody
+            };
+        };
+
+        var basketPosition = cc.p(500, 300);
+
+        var aro = addAro(basketPosition);
+
+        var tab = addTabela(basketPosition, aro);
+
+        // var base = addBase(cc.p(400, 300), aro.sprite.getContentSize().width*1.5);
+
+        var quinaWidth = aro.sprite.getContentSize().width/10;
+
+        var quina1 = addQuina( cp.v.add(basketPosition, 
+            cp.v(-aro.sprite.getContentSize().width/2 , 0)), 
+            quinaWidth, aro.sprite.getContentSize().height, aro, -1);
+
+        var quina2 = addQuina( cp.v.add(basketPosition, 
+            cp.v(aro.sprite.getContentSize().width/2 , 0), aro.body), 
+            quinaWidth, aro.sprite.getContentSize().height, aro, 1)
+
+        
+        var chain;
+        var previousChain;
+
+        var posChain;
+
+        var i = 0;
+        var j = 0;
+
+        var div ;
+
+        var maxWidth = 4;
+        var maxHeight = 3;
+
+        var chainMoreInCenter;
+
+        var container;
+
+        var squire = Squire.create({
+                image : res.tabela_png,
+                pos : cp.v(300,300),
+                space : this.space,
+                context: this
+            });
+
+        this.addChild(squire.sprite);
+
+
+
+        // var teste = addTeste(cp.v(200,300));
+
+
+
+        // var teste_action = cc.MoveTo.create(2, cp.v(250, 300));
+        // teste.sprite.runAction(teste_action);
+        //     cc.sequence(
+        //         teste_action, cc.callFunc(
+        //             function() {
+        //                 cc.log(teste.shape.getBB());
+        //             }, this
+        //         )
+        //     )
+        // );
+
+        
+        // teste.shape.cacheBB();
+        
+
+        container = [];
+
+        for ( i=0; i <maxWidth; i ++) {
+
+            for (j=0; j < maxHeight; j++) {
+
+                chain = addChain(basketPosition);
+
+                div = (aro.sprite.getContentSize().width - chain.sprite.getContentSize().width )/4;
+
+                if ( i < 2 ) chainMoreInCenter = chain.sprite.getContentSize().width/4 * j;
+                else chainMoreInCenter = -chain.sprite.getContentSize().width/4 * j;
+
+                posChain = cp.v.add(basketPosition, 
+                cp.v( -aro.sprite.getContentSize().width/2.5 + chain.sprite.getContentSize().width/2 + div * i 
+                    // + chainMoreInCenter
+                    , 
+                    -aro.sprite.getContentSize().height/2 - chain.sprite.getContentSize().height/2 
+                    - chain.sprite.getContentSize().height * j * 1.1
+                    ));
+
+                chain.body.setPos(posChain);
+
+                if ( previousChain === undefined) {
+
+                    this.space.addConstraint(new cp.PinJoint(aro.body, chain.body, 
+                        cp.v( -aro.sprite.getContentSize().width/2.5 + chain.sprite.getContentSize().width/2 + div * i, 
+                            -aro.sprite.getContentSize().height/2), 
+                        cp.v(0,chain.sprite.getContentSize().height/2)));
+                } else {
+
+                    this.space.addConstraint(new cp.PinJoint(previousChain.body, chain.body, 
+                        cp.v(0, - previousChain.sprite.getContentSize().height/2), 
+                        cp.v(0,previousChain.sprite.getContentSize().height/2)));
+
+                }
+
+                previousChain = chain;
+            }
+
+            container.push(chain);
+
+            previousChain = undefined;
+        }
+
+        for (i=0; i<4; i++) {
+
+            if ( previousChain != undefined && container[i] != undefined) {
+                this.space.addConstraint(new cp.PinJoint(previousChain.body, container[i].body, 
+                    cp.v(previousChain.sprite.getContentSize().width/2, 
+                        -previousChain.sprite.getContentSize().height/2), 
+                    cp.v(-previousChain.sprite.getContentSize().width/2,
+                        -previousChain.sprite.getContentSize().height/2)));
+            }
+
+            previousChain = container[i];
+        }
+    },
+    distanceBetweenShapes:function(pos1, pos2) {
+        var x1 = pos1.x;
+        var y1 = pos1.y;
+
+        var x2 = pos2.x;
+        var y2 = pos2.y;
+
+        var d = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        return d; 
+    },
+    normalizeVector: function(vect) {
+        var length = vectLength(vect);
+        var result = cp.v(vect.x/length, vect.y/length);
+
+        return result;
+    },
+    vectLength: function(vect) {
+        return Math.sqrt(Math.pow(vect.x,2) + Math.pow(vect.y,2));
+    },
+    virtualCollisionBallBasket: function( arbiter, space) {
+
+        var shapes = arbiter.getShapes();
+
+        // var shapeA = arbiter.getA();
+        // var shapeB = arbiter.getB();
+        var bolaShape = shapes[1];
+        var cestaBolaShape = shapes[0];
+
+        // if ( shapeA.collision_type === layerOfSprite.ball ) {
+        //     bolaShape = shapeA;
+        //     cestaBolaShape = shapeB;
+        // } else {
+        //     bolaShape = shapeB;
+        //     cestaBolaShape = shapeA;
+        // }
+
+        var vel = bolaShape.getBody().getVel();
+        cestaBolaShape.getBody().applyImpulse(cp.v(vel.y, vel.y ), cp.v(0, 0));
+
+        return true;
+    }
+});

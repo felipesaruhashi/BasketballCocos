@@ -1,0 +1,28 @@
+{
+    "project_type": "javascript",
+
+    "debugMode" : 1,
+    "showFPS" : true,
+    "frameRate" : 60,
+    "noCache" : false,
+    "id" : "gameCanvas",
+    "renderMode" : 0,
+    "engineDir":"frameworks/cocos2d-html5",
+
+    "modules" : ["cocos2d", "chipmunk"],
+
+    "jsList" : [
+        "src/resource.js",
+        "src/app.js",
+        "src/menu.js",
+        "src/globals.js",
+        "src/gamescene/ball.js",
+        "src/gamescene/squire.js",
+        "src/gamescene/obstacle.js",
+        "src/gamescene/teste.js",
+        "src/gamescene/animationlayer.js",
+        "src/gamescene/backgroundlayer.js",
+        "src/gamescene/statuslayer.js",
+        "src/gamescene/playscene.js"
+    ]
+}
