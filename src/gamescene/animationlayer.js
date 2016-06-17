@@ -5,17 +5,22 @@ var AnimationLayer = cc.Layer.extend({
     fixedSpriteBall: null,
     ballsList: null,
     catapult: null,
-    ctor: function(space, context, bl) {
+    kinematicList: null,
+    ctor: function(space, context, bl, klist) {
         var that = this;
         this.holdingFixedBall = false;
         this._super();
         this.space = space;
 
+        this.kinematicList = klist;
+
         this.ballsList = bl; 
         
         this._context = context;
 
-        this.map = new cc.TMXTiledMap(res.basket_map);
+        //this.map = new cc.TMXTiledMap(res.basket_map);
+        this.map = new cc.TMXTiledMap("res/basket_map.tmx");
+
         this.addChild(this.map);
 
         this._debugNode = new cc.PhysicsDebugNode(this.space);
@@ -65,7 +70,7 @@ var AnimationLayer = cc.Layer.extend({
             },
             onTouchMoved: function(touch, event) {
                 var mousePosition = cp.v(touch.getLocationX(), touch.getLocationY());
-                
+
                 if (that.holdingFixedBall) {
                     var catapultPoint = cp.v(that.catapult.x, that.catapult.y);
                     var pullAreaPosition = catapultPoint;
@@ -105,11 +110,11 @@ var AnimationLayer = cc.Layer.extend({
 
         this.space.addCollisionHandler(layerOfSprite.ground, layerOfSprite.ball,
             this.ballGroundCollisionHandler.bind(this), null, null, null);
-        
+
         var group = this.map.getObjectGroup("Shotter");
         var array = group.getObjects();
         var obj = array[0];
-        
+
         var catapultPos = cp.v(obj["x"], obj["y"]);
 
         this.maxDistance = 100;
@@ -130,7 +135,7 @@ var AnimationLayer = cc.Layer.extend({
         this.catapultPosition = catapultPos;
     },
     readMap: function(array) {
-    	
+
     	var actions = [];
 
     	if ( array.length > 1) {
@@ -139,18 +144,18 @@ var AnimationLayer = cc.Layer.extend({
     			var time = bla["time"];
     			actions.push(cc.MoveTo.create(Number(time), cp.v(bla["x"], bla["y"])));
     		}
-    		
+
     		bla = array[0];
     		time = bla["time"];
     		actions.push(cc.MoveTo.create(Number(time), cp.v(bla["x"], bla["y"])));
-    		
+
     	}
-    	
+
     	return actions;
     },
     initTarget: function() {
         var that = this;
-        
+
         var group = this.map.getObjectGroup("Basket");
         var array = group.getObjects();
         var obj = array[0];
@@ -163,9 +168,9 @@ var AnimationLayer = cc.Layer.extend({
         	space : this.space,
         	context: this
         });
-        
+
         var act = this.readMap(array);
-        
+
         if ( act.length > 1) {
         	var sequence = cc.Sequence.create.apply(cc.Sequence, act);
 	        var forEver = cc.RepeatForever.create(sequence);
@@ -175,17 +180,22 @@ var AnimationLayer = cc.Layer.extend({
         var groupObstacle = this.map.getObjectGroup("Obstacle");
         var arrayObstacle = groupObstacle.getObjects();
         var init = arrayObstacle[0];
-        
+
         var testePos = cp.v(init["x"], init["y"]);
-        
+
         var obstacle = Obstacle.create({
         	image : res.obstacule_png,
         	pos : testePos,
         	space : this.space,
         	context: this
         });
-        
+
+
+        this.kinematicList.push(obstacle.sprite);
+
         var actObstacle = this.readMap(arrayObstacle);
+
+        cc.log(actObstacle);
 
         if ( actObstacle.length > 1) {
         	var sequence2 = cc.Sequence.create.apply(cc.Sequence, actObstacle);
@@ -202,7 +212,7 @@ var AnimationLayer = cc.Layer.extend({
         var y2 = pos2.y;
 
         var d = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-        return d; 
+        return d;
     },
     normalizeVector: function(vect) {
         var length = vectLength(vect);
@@ -214,20 +224,24 @@ var AnimationLayer = cc.Layer.extend({
         return Math.sqrt(Math.pow(vect.x,2) + Math.pow(vect.y,2));
     },
     ballGroundCollisionHandler: function(arbiter, space) {
-        var shapeA = arbiter.getA();
-        var shapeB = arbiter.getB();
+        // dont work on ios
+        //var shapeA = arbiter.getA();
+        //var shapeB = arbiter.getB();
 
-        var body;
-        if (shapeA.collision_type === layerOfSprite.ball) {
-            body = shapeA.getBody();
-        } else {
-            body = shapeB.getBody();
-        }
-
-
-        if (this.ballsList[body.count] != undefined) {
-            this.ballsList[body.count].touchTheGround();
-        }
+        //var bodies = arbiter.getBodies();
+        //
+        //
+        //var body;
+        //if (shapeA.collision_type === layerOfSprite.ball) {
+        //    body = shapeA.getBody();
+        //} else {
+        //    body = shapeB.getBody();
+        //}
+        //
+        //
+        //if (this.ballsList[body.count] != undefined) {
+        //    this.ballsList[body.count].touchTheGround();
+        //}
 
         return true;
     },
@@ -236,8 +250,8 @@ var AnimationLayer = cc.Layer.extend({
 
         // var shapeA = arbiter.getA();
         // var shapeB = arbiter.getB();
-        var bolaShape = shapes[1];
-        var cestaBolaShape = shapes[0];
+        //var bolaShape = shapes[1];
+        //var cestaBolaShape = shapes[0];
 
         // if ( shapeA.collision_type === layerOfSprite.ball ) {
         //     bolaShape = shapeA;
@@ -247,8 +261,8 @@ var AnimationLayer = cc.Layer.extend({
         //     cestaBolaShape = shapeA;
         // }
 
-        var vel = bolaShape.getBody().getVel();
-        cestaBolaShape.getBody().applyImpulse(cp.v(vel.y, vel.y ), cp.v(0, 0));
+        //var vel = bolaShape.getBody().getVel();
+        //cestaBolaShape.getBody().applyImpulse(cp.v(vel.y, vel.y ), cp.v(0, 0));
 
         return true;
     }

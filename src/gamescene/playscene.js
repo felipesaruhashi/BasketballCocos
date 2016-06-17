@@ -2,6 +2,7 @@ var PlayScene = cc.Scene.extend({
 	gameLayer: null,
 	counter: null,
 	ballsList: null,
+	kinematicList: null,
 	onEnter: function() {
 		this._super();
 
@@ -9,7 +10,9 @@ var PlayScene = cc.Scene.extend({
 		
 		this.ballsList = {};
 
-		this.animationLayer = new AnimationLayer(this.space, this, this.ballsList);
+		this.kinematicList = [];
+
+		this.animationLayer = new AnimationLayer(this.space, this, this.ballsList, this.kinematicList);
 		
 		this.gameLayer = new cc.Layer();
 		this.gameLayer.addChild(new BackgroundLayer(), 0, tagOfLayer.background);
@@ -17,7 +20,7 @@ var PlayScene = cc.Scene.extend({
 		this.addChild(this.gameLayer);
 		this.addChild(new StatusLayer(), 0, tagOfLayer.status);
 		
-		counter = 0;
+		this.counter = 0;
 	},
 	initPhysics: function() {
         this.space = new cp.Space();
@@ -47,9 +50,9 @@ var PlayScene = cc.Scene.extend({
 
 				that.space.removeBody(ball.getBody());
 
-				ball.getBody().eachShape(function (shape) {
-					that.space.removeShape(shape);
-				});
+				// ball.getBody().eachShape(function (shape) {
+				// 	that.space.removeShape(shape);
+				// });
 
 				//ball.getBody().eachShape(function (shape) {
 				//	that.space.removeShape(shape);
@@ -92,12 +95,16 @@ var PlayScene = cc.Scene.extend({
     },
     update: function(dt) {
         this.space.step(dt);
-        counter++;
+        this.counter++;
         
-        if ( counter === 25 ) {
-        	counter = 0;
+        if ( this.counter === 25 ) {
+        	this.counter = 0;
         	this.removeSleepingBalls();
         }
+
+		for (var i  = 0;  i < this.kinematicList.length; i ++) {
+			this.kinematicList[i].update(dt);
+		}
         
         
     }

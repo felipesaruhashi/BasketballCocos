@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="25" tileheight="25">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="25" tileheight="25" nextobjectid="8">
  <properties>
   <property name="basket" value=""/>
  </properties>
  <objectgroup name="Basket">
-  <object name="b1" x="754" y="201" width="22" height="19">
+  <object id="1" name="b1" x="754" y="201" width="22" height="19">
    <properties>
     <property name="time" value="0.5"/>
    </properties>
   </object>
-  <object name="b2" x="669" y="276" width="22" height="19">
+  <object id="2" name="b2" x="669" y="276" width="22" height="19">
    <properties>
     <property name="time" value="1.5"/>
    </properties>
   </object>
-  <object name="b3" x="670" y="142" width="22" height="19">
+  <object id="3" name="b3" x="670" y="142" width="22" height="19">
    <properties>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="b4" x="603" y="199" width="22" height="19">
+  <object id="4" name="b4" x="603" y="199" width="22" height="19">
    <properties>
     <property name="time" value="2"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup name="Obstacle">
-  <object name="o1" x="448" y="327">
+  <object id="5" name="o1" x="380" y="79">
    <properties>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="o2" x="300" y="336">
+  <object id="6" name="o2" x="378" y="334">
    <properties>
     <property name="time" value="1"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup name="Shotter">
-  <object name="shotter" x="120" y="221" width="26" height="24"/>
+  <object id="7" name="shotter" x="120" y="221" width="26" height="24"/>
  </objectgroup>
 </map>
