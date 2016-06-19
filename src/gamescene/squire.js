@@ -206,6 +206,7 @@ Squire.create = function(args) {
 
 			if ( diffAltura < 0 && minorDistance < bolaShape.r ) {
 				cc.log("PPPPPoooonto!!!!!!!");
+                args.playScene.increasePoints();
 			}
 			distancesMap.delete(bolaShape.hashid);
 		}

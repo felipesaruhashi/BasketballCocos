@@ -6,7 +6,8 @@ var AnimationLayer = cc.Layer.extend({
     ballsList: null,
     catapult: null,
     kinematicList: null,
-    ctor: function(space, context, bl, klist) {
+    playScene: null,
+    ctor: function(space, context, bl, klist, playScene) {
         var that = this;
         this.holdingFixedBall = false;
         this._super();
@@ -15,6 +16,7 @@ var AnimationLayer = cc.Layer.extend({
         this.kinematicList = klist;
 
         this.ballsList = bl; 
+        this.playScene = playScene;
         
         this._context = context;
 
@@ -23,8 +25,8 @@ var AnimationLayer = cc.Layer.extend({
 
         this.addChild(this.map);
 
-        this._debugNode = new cc.PhysicsDebugNode(this.space);
-        this.addChild(this._debugNode, 10);
+        // this._debugNode = new cc.PhysicsDebugNode(this.space);
+        // this.addChild(this._debugNode, 10);
 
         this.addScenario();
         this.initialization();
@@ -43,8 +45,15 @@ var AnimationLayer = cc.Layer.extend({
         wallBottom.setFriction(0.8);
 
         wallBottom.setCollisionType(layerOfSprite.ground);
-
         this.space.addStaticShape(wallBottom);
+
+        var line = new cc.DrawNode();
+        line.drawSegment(cc.p(0, 20), cc.p(4000,20),2);
+
+        this.addChild(line, 10);
+
+
+
     },
     addBall: function(pos) {
         var ball = new BallSprite(this,pos);
@@ -166,7 +175,8 @@ var AnimationLayer = cc.Layer.extend({
         	image : res.tabela_png,
         	pos : squirepos,
         	space : this.space,
-        	context: this
+        	context: this,
+            playScene: that.playScene
         });
 
         var act = this.readMap(array);
@@ -194,8 +204,6 @@ var AnimationLayer = cc.Layer.extend({
         this.kinematicList.push(obstacle.sprite);
 
         var actObstacle = this.readMap(arrayObstacle);
-
-        cc.log(actObstacle);
 
         if ( actObstacle.length > 1) {
         	var sequence2 = cc.Sequence.create.apply(cc.Sequence, actObstacle);
@@ -225,44 +233,44 @@ var AnimationLayer = cc.Layer.extend({
     },
     ballGroundCollisionHandler: function(arbiter, space) {
         // dont work on ios
-        //var shapeA = arbiter.getA();
-        //var shapeB = arbiter.getB();
+        var shapeA = arbiter.getA();
+        var shapeB = arbiter.getB();
 
-        //var bodies = arbiter.getBodies();
-        //
-        //
-        //var body;
-        //if (shapeA.collision_type === layerOfSprite.ball) {
-        //    body = shapeA.getBody();
-        //} else {
-        //    body = shapeB.getBody();
-        //}
-        //
-        //
-        //if (this.ballsList[body.count] != undefined) {
-        //    this.ballsList[body.count].touchTheGround();
-        //}
+        // var bodies = arbiter.getBodies();
+        
+        
+        var body;
+        if (shapeA.collision_type === layerOfSprite.ball) {
+           body = shapeA.getBody();
+        } else {
+           body = shapeB.getBody();
+        }
+        
+        
+        if (this.ballsList[body.count] != undefined) {
+           this.ballsList[body.count].touchTheGround();
+        }
 
         return true;
     },
     virtualCollisionBallBasket: function( arbiter, space) {
         var shapes = arbiter.getShapes();
 
-        // var shapeA = arbiter.getA();
-        // var shapeB = arbiter.getB();
-        //var bolaShape = shapes[1];
-        //var cestaBolaShape = shapes[0];
+        var shapeA = arbiter.getA();
+        var shapeB = arbiter.getB();
+        var bolaShape = shapes[1];
+        var cestaBolaShape = shapes[0];
 
-        // if ( shapeA.collision_type === layerOfSprite.ball ) {
-        //     bolaShape = shapeA;
-        //     cestaBolaShape = shapeB;
-        // } else {
-        //     bolaShape = shapeB;
-        //     cestaBolaShape = shapeA;
-        // }
+        if ( shapeA.collision_type === layerOfSprite.ball ) {
+            bolaShape = shapeA;
+            cestaBolaShape = shapeB;
+        } else {
+            bolaShape = shapeB;
+            cestaBolaShape = shapeA;
+        }
 
-        //var vel = bolaShape.getBody().getVel();
-        //cestaBolaShape.getBody().applyImpulse(cp.v(vel.y, vel.y ), cp.v(0, 0));
+        var vel = bolaShape.getBody().getVel();
+        cestaBolaShape.getBody().applyImpulse(cp.v(vel.y, vel.y ), cp.v(0, 0));
 
         return true;
     }

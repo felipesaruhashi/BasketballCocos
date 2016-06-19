@@ -3,6 +3,7 @@ var PlayScene = cc.Scene.extend({
 	counter: null,
 	ballsList: null,
 	kinematicList: null,
+	statusLayer: null,
 	onEnter: function() {
 		this._super();
 
@@ -12,15 +13,21 @@ var PlayScene = cc.Scene.extend({
 
 		this.kinematicList = [];
 
-		this.animationLayer = new AnimationLayer(this.space, this, this.ballsList, this.kinematicList);
+		this.statusLayer = new StatusLayer();
+
+		this.animationLayer = new AnimationLayer(this.space, this, this.ballsList, this.kinematicList, this);
 		
 		this.gameLayer = new cc.Layer();
 		this.gameLayer.addChild(new BackgroundLayer(), 0, tagOfLayer.background);
 		this.gameLayer.addChild(this.animationLayer, 0, tagOfLayer.animation);
 		this.addChild(this.gameLayer);
-		this.addChild(new StatusLayer(), 0, tagOfLayer.status);
+		
+		this.addChild(this.statusLayer, 0, tagOfLayer.status);
 		
 		this.counter = 0;
+	},
+	increasePoints: function() {
+		this.statusLayer.updatePoints();
 	},
 	initPhysics: function() {
         this.space = new cp.Space();

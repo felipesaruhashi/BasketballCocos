@@ -13,6 +13,7 @@ var res = {
     fireball_par: "res/particles/fireball.plist",
     fire_png : "res/fire.png",
     obstacule_png : "res/obstaculo.png"
+
 };
 
 var g_resources = [];
